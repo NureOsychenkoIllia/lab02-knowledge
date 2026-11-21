@@ -19,6 +19,8 @@ class KBConfig:
     chunk_chars: int = 900
     top_k: int = 4
     max_distance: float = 0.40
+    chroma_host: str | None = None
+    chroma_port: int = 8000
 
 
 def load_config() -> KBConfig:
@@ -37,4 +39,6 @@ def load_config() -> KBConfig:
         chunk_chars=int(os.getenv("CHUNK_CHARS", "900")),
         top_k=int(os.getenv("KB_TOP_K", "4")),
         max_distance=float(os.getenv("KB_MAX_DISTANCE", "0.40")),
+        chroma_host=os.getenv("CHROMA_HOST") or None,
+        chroma_port=int(os.getenv("CHROMA_PORT", "8000")),
     )

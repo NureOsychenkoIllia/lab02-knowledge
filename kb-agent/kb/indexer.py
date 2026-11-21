@@ -49,6 +49,7 @@ def index_vault(vault: Path, store: KnowledgeStore, max_chars: int = 900) -> Ind
 def main() -> None:
     from .config import load_config
     from .embedder import GeminiEmbedder
+    from .store import create_client
 
     parser = argparse.ArgumentParser(description="Індексація сховища Obsidian у Chroma")
     parser.add_argument("--rebuild", action="store_true",
@@ -58,12 +59,10 @@ def main() -> None:
     cfg = load_config()
     embedder = GeminiEmbedder(cfg.embed_model, cfg.embed_dim)
 
-    if args.rebuild:
-        import chromadb
-        client = chromadb.PersistentClient(path=str(cfg.chroma_path))
-        if cfg.collection in [c.name for c in client.list_collections()]:
-            client.delete_collection(cfg.collection)
-    store = KnowledgeStore(embedder, cfg.collection, cfg.chroma_path)
+    client = create_client(cfg)
+    if args.rebuild and cfg.collection in [c.name for c in client.list_collections()]:
+        client.delete_collection(cfg.collection)
+    store = KnowledgeStore(embedder, cfg.collection, client=client)
 
     started = time.perf_counter()
     report = index_vault(cfg.vault_path, store, cfg.chunk_chars)

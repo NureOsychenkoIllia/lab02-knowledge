@@ -22,6 +22,13 @@ class Hit:
     distance: float
 
 
+def create_client(cfg) -> chromadb.ClientAPI:
+    """PersistentClient для одного процесу, HttpClient коли задано CHROMA_HOST."""
+    if cfg.chroma_host:
+        return chromadb.HttpClient(host=cfg.chroma_host, port=cfg.chroma_port)
+    return chromadb.PersistentClient(path=str(cfg.chroma_path))
+
+
 class KnowledgeStore:
     def __init__(self, embedder: Embedder, collection: str = "obsidian_kb",
                  path: Path | None = None, client=None):

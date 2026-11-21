@@ -52,7 +52,9 @@ def build_tools() -> KnowledgeTools:
     from .config import load_config
     from .embedder import GeminiEmbedder
 
+    from .store import create_client
+
     cfg = load_config()
     store = KnowledgeStore(GeminiEmbedder(cfg.embed_model, cfg.embed_dim),
-                           cfg.collection, cfg.chroma_path)
+                           cfg.collection, client=create_client(cfg))
     return KnowledgeTools(store, cfg.vault_path, cfg.top_k, cfg.max_distance)

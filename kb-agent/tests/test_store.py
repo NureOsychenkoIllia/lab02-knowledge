@@ -1,9 +1,12 @@
+import types
+
 import chromadb
 import pytest
 
+from kb.config import KBConfig
 from kb.embedder import HashEmbedder
 from kb.indexer import index_vault
-from kb.store import EmbedderMismatch, KnowledgeStore
+from kb.store import EmbedderMismatch, KnowledgeStore, create_client
 
 
 def test_index_then_search(store, vault):
@@ -12,6 +15,29 @@ def test_index_then_search(store, vault):
     hits = store.search("віртуальні вузли консистентного хешування", k=3)
     assert hits[0].path == "Шардинг/Хеш-партиціювання.md"
     assert hits[0].distance <= 0.9
+
+
+def test_client_follows_chroma_host(tmp_path, monkeypatch):
+    calls = []
+
+    def fake_persistent(path):
+        calls.append(("persistent", path))
+        return "persistent-client"
+
+    def fake_http(host, port):
+        calls.append(("http", host, port))
+        return "http-client"
+
+    monkeypatch.setattr(chromadb, "PersistentClient", fake_persistent)
+    monkeypatch.setattr(chromadb, "HttpClient", fake_http)
+
+    local = KBConfig(vault_path=tmp_path, chroma_path=tmp_path / "db")
+    remote = KBConfig(vault_path=tmp_path, chroma_path=tmp_path / "db",
+                      chroma_host="localhost", chroma_port=8000)
+    assert create_client(local) == "persistent-client"
+    assert create_client(remote) == "http-client"
+    assert calls == [("persistent", str(tmp_path / "db")),
+                     ("http", "localhost", 8000)]
 
 
 def test_incremental_reindex(vault, store):
