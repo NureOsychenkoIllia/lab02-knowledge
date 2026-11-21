@@ -1,5 +1,6 @@
 """Цикл агента ЛР 1, у якому середовищем стала база знань."""
 
+import re
 import time
 from collections.abc import Callable
 from typing import Any
@@ -14,6 +15,14 @@ from .validator import validate_decision
 MAX_STEPS = 8
 MAX_OBSERVATION_CHARS = 6000
 
+# Модель інколи закриває лише одну дужку в групі посилань: [[A], [[B]]
+CLOSING_BRACKET = re.compile(r"\[\[([^\[\]]+)\](?!\])")
+
+
+def normalize_citations(answer: str) -> str:
+    return CLOSING_BRACKET.sub(r"[[\1]]", answer)
+
+
 DecideFn = Callable[[str, list[str], int, int], dict]
 
 
@@ -26,7 +35,7 @@ def execute_action(decision: dict, state: AgentState,
     if action == "read_note":
         return tools.read_note(args["path"])
     if action == "finish":
-        state.final_answer = args["answer"]
+        state.final_answer = normalize_citations(args["answer"])
         state.finished = True
         state.stop_reason = "finish"
         return None

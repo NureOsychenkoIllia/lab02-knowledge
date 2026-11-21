@@ -1,6 +1,6 @@
 """Цикл агента з базою знань без звернень до LLM: рішення задає сценарій."""
 
-from agent.loop import run_agent
+from agent.loop import normalize_citations, run_agent
 
 
 def scripted(decisions):
@@ -36,3 +36,8 @@ def test_max_steps(tools):
                              "arguments": {"query": "кворум"}}
     state = run_agent("Цикл", tools, decide=endless, max_steps=3)
     assert state.stop_reason == "max_steps" and state.step == 3
+
+
+def test_citations_are_normalized():
+    answer = "Факт [[Кворум], [[CRDT#Злиття]] і ще [[PACELC]]."
+    assert normalize_citations(answer) == "Факт [[Кворум]], [[CRDT#Злиття]] і ще [[PACELC]]."
