@@ -1,0 +1,23 @@
+digraph kb {
+  graph [rankdir=LR, nodesep=0.22, ranksep=0.32, fontname="DejaVu Sans", fontsize=10,
+         pad=0.08, bgcolor="white"];
+  node  [shape=box, style="rounded", fontname="DejaVu Sans", fontsize=9,
+         margin="0.06,0.04", color="#444444", penwidth=1.1, width=1.0, height=0.48];
+  edge  [color="#444444", arrowsize=0.55, fontname="DejaVu Sans", fontsize=8];
+
+  vault  [label="Obsidian kb-vault\n21 нотатка", width=1.15];
+  chunk  [label="chunker.py\n103 фрагменти"];
+  embed  [label="embedder.py\n768, документ"];
+  chroma [label="Chroma\ncosine, 103", width=1.1];
+  vault -> chunk -> embed -> chroma;
+
+  observe  [label="OBSERVE\nмета + дані"];
+  reason   [label="REASON\nLLM: одна дія"];
+  validate [label="VALIDATE\nvalidator.py"];
+  act      [label="ACT\nsearch_knowledge\nread_note"];
+  answer   [label="Відповідь\n[[Нотатка#Розділ]]", shape=note, width=1.05];
+  observe -> reason -> validate -> act -> answer;
+  chroma -> act [style=dashed, constraint=false, label="пошук"];
+  vault -> act [style=dashed, constraint=false, label="read_note"];
+  act -> observe [style=dashed, constraint=false, label="спостереження"];
+}
