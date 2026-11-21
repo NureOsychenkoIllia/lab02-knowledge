@@ -418,7 +418,7 @@ HashEmbedder будує вектор із хешів триграм символ
   [Автор], [Осиченко І. О., група ПЗПІ-23-3, illia.osychenko\@nure.ua],
   [Ліцензія нотаток], [CC BY 4.0],
   [Ліцензія коду], [MIT],
-  [Репозиторій], [lab02-knowledge, проєкт kb-agent],
+  [Репозиторій], [github.com/NureOsychenkoIllia/lab02-knowledge],
   [Архіви], [kb-vault.zip без .obsidian/workspace.json; lab02-knowledge.zip без .env, .venv, chroma\_data і traces],
 )
 
@@ -449,6 +449,33 @@ HashEmbedder будує вектор із хешів триграм символ
 #figure(image("image/git_status.png", width: 62%), caption: [Git status перед фінальним комітом: чисте дерево, ключ і індекс не відстежуються])
 
 Архіви подано окремо: «kb-vault.zip» --- сховище без «.obsidian/workspace.json», «lab02-knowledge.zip» --- репозиторій без «.env», «.venv/», «chroma_data/» і «traces/».
+
+== Склад репозиторію
+
+Повні тексти програм у звіті не дублюються: репозиторій #link("https://github.com/NureOsychenkoIllia/lab02-knowledge")[github.com/NureOsychenkoIllia/lab02-knowledge] містить код, звіт і паспорт бази знань. Нижче --- призначення модулів і їхній обсяг.
+
+#dstu-table(
+  caption: [Модулі проєкту kb-agent],
+  columns: (1.6fr, 1fr, auto),
+  align: (left, left, center),
+  header: ([*Файл*], [*Призначення*], [*Рядків*]),
+  [kb/config.py], [Параметри з .env], [40],
+  [kb/vault.py], [Читання властивостей, тегів і посилань; безпечний шлях], [90],
+  [kb/chunker.py], [Розбиття за заголовками й пакування абзаців], [88],
+  [kb/embedder.py], [GeminiEmbedder і HashEmbedder], [98],
+  [kb/store.py], [Колекція Chroma: запис, видалення, пошук], [90],
+  [kb/indexer.py], [Інкрементна індексація, CLI], [78],
+  [kb/tools.py], [Дії search\_knowledge і read\_note], [58],
+  [kb/search.py, kb/inspect.py], [Налагоджувальний пошук і перегляд колекції], [57],
+  [agent/validator.py, agent/loop.py], [Простір дій, диспетчер, цикл], [118],
+  [agent/reasoning.py], [Інструкція та виклик моделі], [104],
+  [eval/eval\_retrieval.py, eval/citations.py], [hit\@k, MRR, калібрування; перевірка посилань], [96],
+  [eval/retrieval\_set.json], [Контрольний набір із 14 запитів], [---],
+  [baseline.py, main.py], [One-shot, наївний RAG, CLI агента], [86],
+  [tests/], [24 модульні тести й тестове сховище], [244],
+  [experiments/run\_experiment.py], [Експеримент 5 × 3], [72],
+  [scripts/], [Чотири запуски індексатора, перегляд колекції, гігієна Git], [55],
+)
 
 == Відповіді на контрольні питання
 
@@ -491,99 +518,3 @@ HashEmbedder будує вектор із хешів триграм символ
 + HashEmbedder детермінований, працює без мережі й тому придатний для тестів механіки. Він не перевіряє якість семантичного пошуку, бо відображає лише лексичну схожість триграм.
 
 + «write\_note» має створювати нотатку лише в папці Inbox, перевіряти шлях тим самим «resolve\_note\_path», не перезаписувати наявні файли без підтвердження й виконуватися лише після явного підтвердження людини в терміналі; для ADK --- через параметр require\_confirmation. Обмеження папкою й підтвердженням не дають моделі непомітно змінити базу.
-
-#show: style.appendices
-
-#let listing(path, size: 8.5pt) = {
-  set par(justify: false, first-line-indent: 0pt,
-          spacing: 0.32em, leading: 0.32em)
-  pad(left: 1.25cm)[
-    #for line in read(path).split("\n") {
-      text(font: "Courier New", size: size)[
-        #h(if line.starts-with(" ") {
-          line.match(regex("^ +")).text.len() * 0.6 * size
-        } else { 0pt })#line.trim()#linebreak()
-      ]
-    }
-  ]
-}
-
-= Лістинг конфігурації та читання сховища
-
-#listing("../kb-agent/kb/config.py")
-
-#listing("../kb-agent/kb/vault.py")
-
-= Лістинг розбиття на фрагменти
-
-#listing("../kb-agent/kb/chunker.py")
-
-= Лістинг моделі ембедингів і колекції Chroma
-
-#listing("../kb-agent/kb/embedder.py")
-
-#listing("../kb-agent/kb/store.py")
-
-= Лістинг індексатора, дій і пошуку
-
-#listing("../kb-agent/kb/indexer.py")
-
-#listing("../kb-agent/kb/tools.py")
-
-#listing("../kb-agent/kb/search.py")
-
-#listing("../kb-agent/kb/inspect.py")
-
-= Лістинг валідатора, інструкції та циклу агента
-
-#listing("../kb-agent/agent/validator.py")
-
-#listing("../kb-agent/agent/reasoning.py")
-
-#listing("../kb-agent/agent/loop.py")
-
-#listing("../kb-agent/agent/state.py")
-
-#listing("../kb-agent/agent/errors.py")
-
-= Лістинг оцінювання, перевірки посилань і базових ліній
-
-#listing("../kb-agent/eval/retrieval_set.json")
-
-#listing("../kb-agent/eval/eval_retrieval.py")
-
-#listing("../kb-agent/eval/citations.py")
-
-#listing("../kb-agent/baseline.py")
-
-#listing("../kb-agent/main.py")
-
-= Лістинг модульних тестів
-
-#listing("../kb-agent/tests/conftest.py")
-
-#listing("../kb-agent/tests/test_vault.py")
-
-#listing("../kb-agent/tests/test_chunker.py")
-
-#listing("../kb-agent/tests/test_store.py")
-
-#listing("../kb-agent/tests/test_tools.py")
-
-#listing("../kb-agent/tests/test_validator.py")
-
-#listing("../kb-agent/tests/test_loop.py")
-
-= Лістинг скриптів і шаблону нотатки
-
-#listing("../kb-agent/scripts/index_demo.sh")
-
-#listing("../kb-agent/scripts/browse_collection.sh")
-
-#listing("../kb-agent/scripts/git_check.sh")
-
-#listing("../kb-agent/experiments/run_experiment.py")
-
-#listing("../kb-agent/.env.example")
-
-#listing("../../kb-vault/_templates/Нотатка.md")

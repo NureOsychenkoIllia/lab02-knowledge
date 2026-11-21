@@ -10,7 +10,7 @@
 | Автор | Осиченко І. О., група ПЗПІ-23-3, illia.osychenko@nure.ua |
 | Ліцензія нотаток | CC BY 4.0 |
 | Ліцензія коду | MIT |
-| Репозиторій | `lab02-knowledge` (проєкт `kb-agent`) |
+| Репозиторій | https://github.com/NureOsychenkoIllia/lab02-knowledge (проєкт `kb-agent`) |
 | Архіви | `kb-vault.zip` --- сховище без `.obsidian/workspace.json`; `lab02-knowledge.zip` --- репозиторій без `.env`, `.venv/`, `chroma_data/`, `traces/` |
 
 ## 2. Призначення
