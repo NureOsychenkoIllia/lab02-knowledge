@@ -40,14 +40,14 @@ def evaluate(store: KnowledgeStore, cases: list[dict], k: int,
 
 def main() -> None:
     from kb.config import load_config
-    from kb.embedder import GeminiEmbedder
+    from kb.embedder import make_embedder
     from kb.store import create_client
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-k", type=int, default=4)
     args = parser.parse_args()
     cfg = load_config()
-    store = KnowledgeStore(GeminiEmbedder(cfg.embed_model, cfg.embed_dim),
+    store = KnowledgeStore(make_embedder(cfg.embed_model, cfg.embed_dim),
                            cfg.collection, client=create_client(cfg))
     report = evaluate(store, json.loads(SET_PATH.read_text(encoding="utf-8")),
                       args.k, cfg.max_distance)

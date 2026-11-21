@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from kb.config import load_config
-from kb.embedder import GeminiEmbedder
+from kb.embedder import make_embedder
 from kb.store import KnowledgeStore, create_client
 from kb.tools import KnowledgeTools
 
@@ -25,7 +25,7 @@ def main() -> None:
     args = parser.parse_args()
 
     cfg = load_config()
-    store = KnowledgeStore(GeminiEmbedder(cfg.embed_model, cfg.embed_dim),
+    store = KnowledgeStore(make_embedder(cfg.embed_model, cfg.embed_dim),
                            cfg.collection, client=create_client(cfg))
     tools = KnowledgeTools(store, cfg.vault_path, writable=args.allow_write)
     print(tools.write_note(args.title, args.body, "тест"))

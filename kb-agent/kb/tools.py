@@ -86,17 +86,18 @@ class KnowledgeTools:
                 'source: "створено агентом"', "updated: 2026-11-21", "---", ""]
         target.write_text("\n".join(meta) + body.strip() + "\n", encoding="utf-8")
         return (f"CREATED: [[{name}]] path=\"{INBOX}/{name}.md\" chars={len(body)}; "
-                f"run the indexer to make it searchable")
+                f"лежить у папці Inbox і потрапить до індексу лише після "
+                f"перегляду людиною й переіндексації з --include-inbox")
 
 
 def build_tools() -> KnowledgeTools:
     """Збирає робочі інструменти з параметрів .env."""
     from .config import load_config
-    from .embedder import GeminiEmbedder
+    from .embedder import make_embedder
 
     from .store import create_client
 
     cfg = load_config()
-    store = KnowledgeStore(GeminiEmbedder(cfg.embed_model, cfg.embed_dim),
+    store = KnowledgeStore(make_embedder(cfg.embed_model, cfg.embed_dim),
                            cfg.collection, client=create_client(cfg))
     return KnowledgeTools(store, cfg.vault_path, cfg.top_k, cfg.max_distance)

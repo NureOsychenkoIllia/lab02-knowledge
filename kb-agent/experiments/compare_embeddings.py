@@ -57,16 +57,30 @@ def main() -> None:
         count = index(cfg.vault_path, store, cfg.chunk_chars)
         seconds = time.perf_counter() - started
         report = evaluate(store, cases, args.k, cfg.max_distance)
+        correct = [r["best_distance"] for r in report["rows"]
+                   if r["expected"] and r["best_distance"] is not None]
+        outside = [r["best_distance"] for r in report["rows"]
+                   if not r["expected"] and r["best_distance"] is not None]
+        # Поріг калібрують окремо для кожної моделі: середина проміжку між
+        # найбільшою відстанню правильного результату й найменшою поза базою.
+        suggested = round((max(correct) + min(outside)) / 2, 3) if correct and outside else None
         row = {"model": embedder.name, "collection": collection, "chunks": count,
                "dim": embedder.dim, "index_seconds": round(seconds, 1),
                "embedding_calls": embedder.calls,
                "hit_at_k": report["hit_at_k"], "mrr": report["mrr"],
+               "max_correct_distance": round(max(correct), 3),
+               "min_out_of_scope_distance": round(min(outside), 3),
+               "suggested_threshold": suggested,
+               "threshold_used": cfg.max_distance,
                "false_accepts": report["out_of_scope_accepted"],
+               "false_accepts_at_suggested": sum(d <= suggested for d in outside) if suggested else None,
                "rows": report["rows"]}
         rows.append(row)
         print(f"{embedder.name:28} chunks={count} hit@{args.k}={row['hit_at_k']} "
-              f"MRR={row['mrr']} false={row['false_accepts']} "
-              f"time={row['index_seconds']}s")
+              f"MRR={row['mrr']} correct<={row['max_correct_distance']} "
+              f"outside>={row['min_out_of_scope_distance']} "
+              f"threshold={suggested} time={row['index_seconds']}s "
+              f"calls={embedder.calls}")
 
     out = Path("experiments/results/embeddings.json")
     out.parent.mkdir(parents=True, exist_ok=True)

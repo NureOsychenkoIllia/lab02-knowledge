@@ -41,3 +41,13 @@ def test_resolve_note_path_rejects_outside_vault(vault):
 def test_strip_wikilinks_keeps_caption():
     text = "див. [[Хеш-партиціювання|хешування]] і [[CRDT#Злиття]]"
     assert strip_wikilinks(text) == "див. хешування і CRDT"
+
+
+def test_inbox_is_not_indexed_until_reviewed(vault):
+    inbox = vault / "Inbox"
+    inbox.mkdir()
+    (inbox / "Нотатка агента.md").write_text(
+        "---\ntags: [тест]\nsource: \"агент\"\n---\n# Нотатка агента\n\nТекст.\n",
+        encoding="utf-8")
+    assert all(not note.path.startswith("Inbox/") for note in iter_notes(vault))
+    assert any(note.path.startswith("Inbox/") for note in iter_notes(vault, include_inbox=True))

@@ -24,11 +24,12 @@ class IndexReport:
                 f"chunks written {self.chunks}")
 
 
-def index_vault(vault: Path, store: KnowledgeStore, max_chars: int = 900) -> IndexReport:
+def index_vault(vault: Path, store: KnowledgeStore, max_chars: int = 900,
+                include_inbox: bool = False) -> IndexReport:
     report = IndexReport()
     indexed = store.indexed_hashes()
     seen: set[str] = set()
-    for note in iter_notes(vault):
+    for note in iter_notes(vault, include_inbox):
         seen.add(note.path)
         if indexed.get(note.path) == note.content_hash:
             report.unchanged += 1
@@ -48,16 +49,18 @@ def index_vault(vault: Path, store: KnowledgeStore, max_chars: int = 900) -> Ind
 
 def main() -> None:
     from .config import load_config
-    from .embedder import GeminiEmbedder
+    from .embedder import make_embedder
     from .store import create_client
 
     parser = argparse.ArgumentParser(description="Індексація сховища Obsidian у Chroma")
     parser.add_argument("--rebuild", action="store_true",
                         help="видалити колекцію і проіндексувати заново")
+    parser.add_argument("--include-inbox", action="store_true",
+                        help="індексувати й папку Inbox (лише після перегляду нотаток)")
     args = parser.parse_args()
 
     cfg = load_config()
-    embedder = GeminiEmbedder(cfg.embed_model, cfg.embed_dim)
+    embedder = make_embedder(cfg.embed_model, cfg.embed_dim)
 
     client = create_client(cfg)
     if args.rebuild and cfg.collection in [c.name for c in client.list_collections()]:
@@ -65,7 +68,7 @@ def main() -> None:
     store = KnowledgeStore(embedder, cfg.collection, client=client)
 
     started = time.perf_counter()
-    report = index_vault(cfg.vault_path, store, cfg.chunk_chars)
+    report = index_vault(cfg.vault_path, store, cfg.chunk_chars, args.include_inbox)
     print(f"vault: {cfg.vault_path}")
     print(f"index: {report}")
     print(f"collection '{cfg.collection}': {store.count()} chunks, "

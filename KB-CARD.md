@@ -41,6 +41,7 @@
 
 - Модель ембедингів / розмірність: `gemini-embedding-001` / 768 (`output_dimensionality`).
 - Порівняння моделей (крок 13): all-MiniLM-L6-v2 hit@4 = 0.417 / MRR = 0.417, gemini-embedding-001 — 1.0 / 0.944, gemini-embedding-2 — 1.0 / 0.958.
+- Поріг калібрується окремо для кожної моделі: 0.395 (gemini-embedding-001), 0.366 (gemini-embedding-2; для 001-порогу 0.40 запас лише 0.003), 0.458 (all-MiniLM-L6-v2).
 - Метрика: cosine; `chunk_chars`: 900 (найдовший розділ — 628 символів, тому розділ не ріжеться); `top_k`: 4; `KB_MAX_DISTANCE`: 0.40.
 - Режим Chroma: `PersistentClient` (каталог `kb-agent/chroma_data`) або `HttpClient` за `CHROMA_HOST`.
 
@@ -52,7 +53,7 @@
 
 ## 6. Агент
 
-- Дії: `search_knowledge`, `read_note`, `write_note` (лише `Inbox/`, лише з `--allow-write` і підтвердженням людини), `finish`; `MAX_STEPS` = 8; модель `gemini-3.5-flash-lite`.
+- Дії: `search_knowledge`, `read_note`, `write_note` (лише `Inbox/`, лише з `--allow-write` і підтвердженням людини; папка `Inbox/` не індексується до перегляду, `--include-inbox` додає її явно), `finish`; `MAX_STEPS` = 8; модель `gemini-3.5-flash-lite`.
 - Результати експерименту (правильність 0–2, середнє): one-shot **0.8** / RAG **1.8** / агент **2.0**; один запуск на запит.
 - Обґрунтованість (частка дійсних посилань): RAG 8/8, агент у трасуваннях 11/11; one-shot посилань не дає.
 - Середня кількість викликів LLM: one-shot 1.0, RAG 1.0, агент 2.4; ембедингів: 0 / 1.0 / 1.2.

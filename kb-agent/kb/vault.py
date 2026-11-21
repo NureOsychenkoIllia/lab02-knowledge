@@ -58,10 +58,19 @@ def parse_note(vault: Path, file: Path) -> Note:
     )
 
 
-def iter_notes(vault: Path) -> Iterator[Note]:
-    """Усі .md-файли, крім службових (.obsidian, .trash) і шаблонів (_templates)."""
+# Нотатки, створені агентом, індексують лише після перегляду людиною:
+# інакше отруєний текст повертається в контекст через write_note й переіндексацію.
+UNINDEXED_DIRS = {"Inbox"}
+
+
+def iter_notes(vault: Path, include_inbox: bool = False) -> Iterator[Note]:
+    """Усі .md-файли, крім службових (.obsidian, .trash), шаблонів (_templates)
+    і папки Inbox, доки її нотатки не переглянуто людиною."""
     for file in sorted(vault.rglob("*.md")):
-        if any(part.startswith((".", "_")) for part in file.relative_to(vault).parts):
+        parts = file.relative_to(vault).parts
+        if any(part.startswith((".", "_")) for part in parts):
+            continue
+        if not include_inbox and parts[0] in UNINDEXED_DIRS:
             continue
         yield parse_note(vault, file)
 
