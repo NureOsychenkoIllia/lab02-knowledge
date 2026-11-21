@@ -6,6 +6,7 @@ from .errors import DecisionError
 ALLOWED_ACTIONS: dict[str, dict[str, set[str]]] = {
     "search_knowledge": {"required": {"query"}, "optional": {"tag"}},
     "read_note": {"required": {"path"}, "optional": set()},
+    "write_note": {"required": {"title", "body"}, "optional": {"tags"}},
     "finish": {"required": {"answer"}, "optional": set()},
 }
 

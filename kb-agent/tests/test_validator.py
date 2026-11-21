@@ -6,7 +6,7 @@ from agent.validator import validate_decision
 
 def test_unknown_action_is_rejected():
     with pytest.raises(DecisionError, match="unknown action"):
-        validate_decision({"action": "write_note", "arguments": {"path": "Inbox/a.md"}})
+        validate_decision({"action": "delete_note", "arguments": {"path": "Inbox/a.md"}})
 
 
 def test_missing_and_extra_arguments_are_rejected():
@@ -20,6 +20,13 @@ def test_missing_and_extra_arguments_are_rejected():
 def test_empty_argument_is_rejected():
     with pytest.raises(DecisionError, match="non-empty string"):
         validate_decision({"action": "finish", "arguments": {"answer": "   "}})
+
+
+def test_write_note_arguments_are_checked():
+    validate_decision({"action": "write_note",
+                       "arguments": {"title": "Нотатка", "body": "Текст", "tags": "cap"}})
+    with pytest.raises(DecisionError, match="missing arguments"):
+        validate_decision({"action": "write_note", "arguments": {"title": "Нотатка"}})
 
 
 def test_valid_decisions_pass():

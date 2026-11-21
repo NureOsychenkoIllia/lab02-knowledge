@@ -21,9 +21,14 @@ class Embedder(Protocol):
     def embed_query(self, text: str) -> list[float]: ...
 
 
-def _normalize(vector: list[float]) -> list[float]:
-    norm = math.sqrt(sum(x * x for x in vector)) or 1.0
-    return [x / norm for x in vector]
+def _normalize(vector) -> list[float]:
+    """Приводить вектор до одиничної довжини й до звичайних float.
+
+    Моделі Chroma повертають numpy.float32, а Chroma приймає лише list[float].
+    """
+    values = [float(x) for x in vector]
+    norm = math.sqrt(sum(x * x for x in values)) or 1.0
+    return [x / norm for x in values]
 
 
 class GeminiEmbedder:
@@ -69,6 +74,76 @@ class GeminiEmbedder:
 
     def embed_query(self, text: str) -> list[float]:
         return self._embed([text], "RETRIEVAL_QUERY")[0]
+
+
+class GeminiEmbedding2:
+    """gemini-embedding-2: типи задачі задають префіксами в тексті.
+
+    Модель мультимодальна, тому SDK повертає один вектор на весь пакет; щоб
+    кожен фрагмент мав власний вектор, тексти кодують по одному.
+    """
+
+    QUERY_PREFIX = "task: search result | query: "
+    DOC_PREFIX = "task: search result | title: {title} | text: "
+
+    def __init__(self, model: str = "gemini-embedding-2", dim: int = 768):
+        self.model, self.dim = model, dim
+        self.name = f"{model}:{dim}"
+        self.calls = 0
+        self._client = genai.Client()
+
+    def _one(self, text: str) -> list[float]:
+        self.calls += 1
+        for delay in RETRY_DELAYS:
+            try:
+                response = self._client.models.embed_content(
+                    model=self.model,
+                    contents=[text],
+                    config=types.EmbedContentConfig(output_dimensionality=self.dim),
+                )
+                if len(response.embeddings) != 1:
+                    raise RuntimeError("embedding-2 aggregated the batch")
+                return _normalize(list(response.embeddings[0].values))
+            except genai.errors.APIError as exc:
+                if getattr(exc, "code", None) != 429:
+                    raise
+                time.sleep(delay)
+        raise RuntimeError(f"{self.model}: quota exhausted")
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        return [self._one(self.DOC_PREFIX.format(title="none") + t) for t in texts]
+
+    def embed_query(self, text: str) -> list[float]:
+        return self._one(self.QUERY_PREFIX + text)
+
+
+class MiniLmEmbedder:
+    """all-MiniLM-L6-v2 — стандартна модель Chroma; англомовна, 384 виміри."""
+
+    def __init__(self) -> None:
+        from chromadb.utils.embedding_functions import DefaultEmbeddingFunction
+
+        self._fn = DefaultEmbeddingFunction()
+        self.name = "all-MiniLM-L6-v2:384"
+        self.dim = 384
+        self.calls = 0
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        self.calls += 1
+        return [_normalize(v) for v in self._fn(texts)]
+
+    def embed_query(self, text: str) -> list[float]:
+        self.calls += 1
+        return _normalize(self._fn([text])[0])
+
+
+def make_embedder(name: str, dim: int = 768):
+    """Вибір моделі за назвою з .env або прапорця."""
+    if name.startswith("all-MiniLM"):
+        return MiniLmEmbedder()
+    if name == "gemini-embedding-2":
+        return GeminiEmbedding2(name, dim)
+    return GeminiEmbedder(name, dim)
 
 
 class HashEmbedder:

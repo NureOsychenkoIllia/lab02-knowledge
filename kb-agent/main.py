@@ -23,6 +23,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Агент з базою знань Obsidian + Chroma")
     parser.add_argument("goal", help="питання до бази знань у лапках")
     parser.add_argument("--mode", choices=["agent", "rag", "oneshot"], default="agent")
+    parser.add_argument("--allow-write", action="store_true",
+                        help="дозволити дію write_note (лише папка Inbox, з підтвердженням)")
     args = parser.parse_args()
 
     started = time.perf_counter()
@@ -32,6 +34,7 @@ def main() -> None:
         return
 
     tools = build_tools()
+    tools.writable = args.allow_write
     if args.mode == "rag":
         print(rag_answer(args.goal, tools))
         print(f"\n[rag] LLM calls: 1, embedding calls: {tools.store.embedder.calls}, "

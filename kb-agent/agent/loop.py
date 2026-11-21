@@ -34,6 +34,8 @@ def execute_action(decision: dict, state: AgentState,
         return tools.search_knowledge(args["query"], args.get("tag"))
     if action == "read_note":
         return tools.read_note(args["path"])
+    if action == "write_note":
+        return tools.write_note(args["title"], args["body"], args.get("tags") or "")
     if action == "finish":
         state.final_answer = normalize_citations(args["answer"])
         state.finished = True

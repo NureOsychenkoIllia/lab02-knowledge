@@ -23,3 +23,11 @@ def test_read_note_truncates_long_text(tools):
     short = KnowledgeTools(tools.store, tools.vault, max_note_chars=80)
     result = short.read_note("CRDT")
     assert "[...truncated]" in result
+
+
+def test_citations_accept_created_note():
+    from eval.citations import check_citations
+
+    observations = ['CREATED: [[Кошик і read-your-writes]] path="Inbox/Кошик і read-your-writes.md" chars=35']
+    answer = "Нотатку створено [[Inbox/Кошик і read-your-writes.md]]."
+    assert check_citations(answer, observations)["grounded"]

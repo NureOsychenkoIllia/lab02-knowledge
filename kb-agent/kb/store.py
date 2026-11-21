@@ -94,4 +94,11 @@ class KnowledgeStore:
         ]
 
     def reset(self) -> None:
+        """Видаляє колекцію й одразу створює її знову з тими самими параметрами."""
         self.client.delete_collection(self.name)
+        self.col = self.client.create_collection(
+            name=self.name,
+            embedding_function=None,
+            configuration={"hnsw": {"space": "cosine"}},
+            metadata={"embedder": self.embedder.name},
+        )

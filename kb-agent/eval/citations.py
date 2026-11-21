@@ -10,13 +10,26 @@ import sys
 
 CITATION = re.compile(r"\[\[([^\]]+)\]\]")
 SOURCE = re.compile(r'source="\[\[([^\]]+)\]\]"')
+# write_note підтверджує створення рядком CREATED: [[Назва]] path="Inbox/…"
+CREATED = re.compile(r'CREATED: \[\[([^\]]+)\]\] path="([^"]+)"')
+
+
+def _note_name(citation: str) -> str:
+    """Inbox/Нотатка.md -> Нотатка: модель цитує створену нотатку шляхом."""
+    stem = citation.split("#")[0].rsplit("/", 1)[-1]
+    return stem[:-3] if stem.endswith(".md") else stem
 
 
 def check_citations(answer: str, observations: list[str]) -> dict:
     cited = CITATION.findall(answer or "")
     sources = {s for obs in observations for s in SOURCE.findall(obs or "")}
+    created = {f"{title}" for obs in observations
+               for title, _ in CREATED.findall(obs or "")}
+    sources |= created
     titles = {s.split("#")[0] for s in sources}
-    valid = [c for c in cited if c in sources or c.split("#")[0] in titles]
+    valid = [c for c in cited
+             if c in sources or c.split("#")[0] in titles
+             or _note_name(c) in created]
     return {"cited": len(cited), "valid": len(valid),
             "invalid": sorted(set(cited) - set(valid)),
             "grounded": bool(cited) and len(valid) == len(cited)}
