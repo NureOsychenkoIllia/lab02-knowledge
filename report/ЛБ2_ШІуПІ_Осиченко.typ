@@ -444,9 +444,9 @@ HashEmbedder будує вектор із хешів триграм символ
 
 == Фіксація результатів
 
-Репозиторій зафіксовано одним комітом «Lab 02: Obsidian knowledge base, Chroma index, agent tools». Перевірка «git status --short» нічого не виводить, тобто робоче дерево чисте; серед відстежуваних файлів немає ні ключа, ні індексу, ні трасувань. Команда «git check-ignore -v» підтверджує три правила: «.env», «chroma_data/» і «traces/» ігноруються. Ключ зберігається лише у файлі «kb-agent/.env» із правами 600.
+Репозиторій зафіксовано комітами «Lab 02: Obsidian knowledge base, Chroma index, agent tools» і «Додати перевірку гігієни репозиторію». Скрипт «kb-agent/scripts/git_check.sh» показує, що робоче дерево чисте; серед відстежуваних файлів немає ні ключа, ні індексу, ні трасувань. Команда «git check-ignore» підтверджує, що «.env», «chroma_data/» і «traces/» ігноруються. Ключ зберігається лише у файлі «kb-agent/.env» із правами 600.
 
-#figure(image("image/git_status.png", width: 100%), caption: [Git status перед фінальним комітом: чисте дерево, ключ і індекс не відстежуються])
+#figure(image("image/git_status.png", width: 62%), caption: [Git status перед фінальним комітом: чисте дерево, ключ і індекс не відстежуються])
 
 Архіви подано окремо: «kb-vault.zip» --- сховище без «.obsidian/workspace.json», «lab02-knowledge.zip» --- репозиторій без «.env», «.venv/», «chroma_data/» і «traces/».
 
@@ -579,6 +579,8 @@ HashEmbedder будує вектор із хешів триграм символ
 #listing("../kb-agent/scripts/index_demo.sh")
 
 #listing("../kb-agent/scripts/browse_collection.sh")
+
+#listing("../kb-agent/scripts/git_check.sh")
 
 #listing("../kb-agent/experiments/run_experiment.py")
 
