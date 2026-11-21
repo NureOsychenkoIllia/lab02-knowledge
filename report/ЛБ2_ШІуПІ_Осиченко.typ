@@ -587,7 +587,3 @@ HashEmbedder будує вектор із хешів триграм символ
 #listing("../kb-agent/.env.example")
 
 #listing("../../kb-vault/_templates/Нотатка.md")
-
-= Лістинг паспорта бази знань
-
-#listing("../KB-CARD.md")
