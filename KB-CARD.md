@@ -40,7 +40,7 @@
 ## 4. Індекс
 
 - Модель ембедингів / розмірність: `gemini-embedding-001` / 768 (`output_dimensionality`).
-- Метрика: cosine; `chunk_chars`: 900; `top_k`: 4; `KB_MAX_DISTANCE`: 0.40.
+- Метрика: cosine; `chunk_chars`: 900; `top_k`: 4; `KB_MAX_DISTANCE`: 0.40; `chunk_chars` утримує найдовший розділ (628 символів) як один фрагмент.
 - Режим Chroma: `PersistentClient` (каталог `kb-agent/chroma_data`).
 - Контрольний набір: 12 запитів у базі, 2 поза базою.
 
