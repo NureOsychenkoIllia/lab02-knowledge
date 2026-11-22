@@ -57,8 +57,13 @@ def main() -> None:
         count = index(cfg.vault_path, store, cfg.chunk_chars)
         seconds = time.perf_counter() - started
         report = evaluate(store, cases, args.k, cfg.max_distance)
+        # Для моделі, яка часто помиляється, правильна нотатка може не потрапити
+        # навіть у top-k, і тоді її відстань невідома. Тому беремо найбільшу
+        # відстань першого результату серед запитів у базі й окремо рахуємо,
+        # у скількох із них цей результат справді правильний.
         correct = [r["best_distance"] for r in report["rows"]
                    if r["expected"] and r["best_distance"] is not None]
+        correct_top1 = sum(1 for r in report["rows"] if r["expected"] and r["rank"] == 1)
         outside = [r["best_distance"] for r in report["rows"]
                    if not r["expected"] and r["best_distance"] is not None]
         # Поріг калібрують окремо для кожної моделі: середина проміжку між
@@ -68,7 +73,8 @@ def main() -> None:
                "dim": embedder.dim, "index_seconds": round(seconds, 1),
                "embedding_calls": embedder.calls,
                "hit_at_k": report["hit_at_k"], "mrr": report["mrr"],
-               "max_correct_distance": round(max(correct), 3),
+               "max_top1_distance": round(max(correct), 3),
+               "top1_correct": correct_top1,
                "min_out_of_scope_distance": round(min(outside), 3),
                "suggested_threshold": suggested,
                "threshold_used": cfg.max_distance,

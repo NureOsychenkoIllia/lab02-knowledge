@@ -20,11 +20,11 @@ echo
 echo "# відхилені назви й повторне створення"
 printf 'y\n' | PYTHONPATH=. uv run python - <<'PY'
 from kb.config import load_config
-from kb.embedder import GeminiEmbedder
+from kb.embedder import make_embedder
 from kb.store import KnowledgeStore, create_client
 from kb.tools import KnowledgeTools
 cfg = load_config()
-tools = KnowledgeTools(KnowledgeStore(GeminiEmbedder(cfg.embed_model, cfg.embed_dim),
+tools = KnowledgeTools(KnowledgeStore(make_embedder(cfg.embed_model, cfg.embed_dim),
                         cfg.collection, client=create_client(cfg)), cfg.vault_path,
                         writable=True)
 for title in ("../../etc/passwd", "_templates/Шаблон", "Перевірка дії write_note"):
